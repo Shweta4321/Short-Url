@@ -24,7 +24,6 @@ mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true}).then(()
 app.set('view engine', 'ejs')
 
 app.get('/', async (req, res, next) => {
-  console.log(req.headers["x-forwarded-for"],"req.headers['x-forwarded-for']")
   res.render('index')
 })
 
@@ -32,6 +31,7 @@ app.post('/', async (req, res, next) => {
   try {
     const { url } = req.body
     console.log(req.headers.host,"req.headers.host");
+    console.log(req.headers["x-forwarded-for"],"req.headers['x-forwarded-for']")
     console.log(url,"in urll");
     if (!url) {
       throw createHttpError.BadRequest('Provide a valid url')
