@@ -31,10 +31,12 @@ app.post('/', async (req, res, next) => {
   try {
     const { url } = req.body
     console.log(req.headers.host,"req.headers.host");
+    console.log(url,"in urll");
     if (!url) {
       throw createHttpError.BadRequest('Provide a valid url')
     }
     const urlExists = await ShortUrl.findOne({ url })
+    console.log(urlExists,"urlExistsurlExists")
     if (urlExists) {
       res.render('index', {
         short_url: `${req.headers.host}/${urlExists.shortId}`,
@@ -43,6 +45,7 @@ app.post('/', async (req, res, next) => {
     }
     const shortUrl = new ShortUrl({ url: url, shortId: shortId.generate() })
     const result = await shortUrl.save()
+    console.log("i am here")
     redis.set(`${req.headers.host}/${result.shortId}`,url);
     res.render('index', {
       short_url: `${req.headers.host}/${result.shortId}`,
