@@ -3,11 +3,8 @@ const shortId = require('shortid');
 const createHttpError = require('http-errors');
 const mongoose = require('mongoose');
 const path = require('path');
-const Redis = require("ioredis");
 const ShortUrl = require('./models/url');
-const redis = new Redis(); 
-
-
+ 
 const app = express()
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.json())
@@ -30,14 +27,10 @@ app.get('/', async (req, res, next) => {
 app.post('/', async (req, res, next) => {
   try {
     const { url } = req.body
-    console.log(req.headers.host,"req.headers.host");
-    console.log(req.headers["x-forwarded-for"],"req.headers['x-forwarded-for']")
-    console.log(url,"in urll");
     if (!url) {
       throw createHttpError.BadRequest('Provide a valid url')
     }
     const urlExists = await ShortUrl.findOne({ url })
-    console.log(urlExists,"urlExistsurlExists")
     if (urlExists) {
       res.render('index', {
         short_url: `${req.headers.host}/${urlExists.shortId}`,
@@ -46,8 +39,6 @@ app.post('/', async (req, res, next) => {
     }
     const shortUrl = new ShortUrl({ url: url, shortId: shortId.generate() })
     const result = await shortUrl.save()
-    console.log("i am here")
-    redis.set(`${req.headers.host}/${result.shortId}`,url);
     res.render('index', {
       short_url: `${req.headers.host}/${result.shortId}`,
     })
@@ -60,17 +51,11 @@ app.get('/:shortId', async (req, res, next) => {
   try {
     let result={};
     let key = req.url;
-    let cachedBody = await redis.get(`${req.headers.host}${key}`)
-    if(cachedBody){
-      result.url = cachedBody
-    }
-    else{
-      const { shortId } = req.params
-       result = await ShortUrl.findOne({ shortId })
-      if (!result) {
+    const { shortId } = req.params
+     result = await ShortUrl.findOne({ shortId })
+     if (!result) {
         throw createHttpError.NotFound('Short url does not exist')
-      }
-    }
+     }
     res.redirect(result.url)
   } catch (error) {
     next(error)
