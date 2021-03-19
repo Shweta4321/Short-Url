@@ -24,6 +24,7 @@ mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true}).then(()
 app.set('view engine', 'ejs')
 
 app.get('/', async (req, res, next) => {
+  console.log(req.headers["x-forwarded-for"],"req.headers['x-forwarded-for']")
   res.render('index')
 })
 
