@@ -30,6 +30,7 @@ app.get('/', async (req, res, next) => {
 app.post('/', async (req, res, next) => {
   try {
     const { url } = req.body
+    console.log(req.headers.host,"req.headers.host");
     if (!url) {
       throw createHttpError.BadRequest('Provide a valid url')
     }
