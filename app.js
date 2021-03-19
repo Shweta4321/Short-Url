@@ -40,7 +40,7 @@ app.post('/', async (req, res, next) => {
     const shortUrl = new ShortUrl({ url: url, shortId: shortId.generate() })
     const result = await shortUrl.save()
     res.render('index', {
-      short_url: `${req.headers.host}/${result.shortId}`,
+      short_url: `/${result.shortId}`,
     })
   } catch (error) {
     next(error)
