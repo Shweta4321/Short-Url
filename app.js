@@ -10,7 +10,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-const uri = "mongodb+srv://yellow_shweta:yellow2020@cluster0.mpa4o.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const uri = "mongodb+srv://yellow_shweta:<password>@cluster0.mpa4o.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true}).then(()=>{
   console.log("Connected successfully to server");
 }).catch(error=>{
