@@ -20,6 +20,10 @@ mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true}).then(()
 
 app.set('view engine', 'ejs')
 
+app.use((req, res, next) => {
+  next(createHttpError.NotFound())
+})
+
 app.get('/', async (req, res, next) => {
   res.render('index')
 })
@@ -33,14 +37,15 @@ app.post('/', async (req, res, next) => {
     const urlExists = await ShortUrl.findOne({ url })
     if (urlExists) {
       res.render('index', {
-        short_url: `/${urlExists.shortId}`,
+        short_url: `${req.headers.host}/${urlExists.shortId}`,
       })
       return
     }
     const shortUrl = new ShortUrl({ url: url, shortId: shortId.generate() })
     const result = await shortUrl.save()
+    redis.set(`${req.headers.host}/${result.shortId}`, url);
     res.render('index', {
-      short_url: `/${result.shortId}`,
+      short_url: `${req.headers.host}/${result.shortId}`,
     })
   } catch (error) {
     next(error)
@@ -49,21 +54,23 @@ app.post('/', async (req, res, next) => {
 
 app.get('/:shortId', async (req, res, next) => {
   try {
-    let result={};
+    let result = {};
     let key = req.url;
-    const { shortId } = req.params
-     result = await ShortUrl.findOne({ shortId })
-     if (!result) {
+    let cachedBody = await redis.get(`${req.headers.host}${key}`)
+    if (cachedBody) {
+      result.url = cachedBody
+    }
+    else {
+      const { shortId } = req.params
+      result = await ShortUrl.findOne({ shortId })
+      if (!result) {
         throw createHttpError.NotFound('Short url does not exist')
-     }
+      }
+    }
     res.redirect(result.url)
   } catch (error) {
     next(error)
   }
-})
-
-app.use((req, res, next) => {
-  next(createHttpError.NotFound())
 })
 
 app.use((err, req, res, next) => {
