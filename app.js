@@ -3,6 +3,7 @@ const shortId = require('shortid');
 const createHttpError = require('http-errors');
 const mongoose = require('mongoose');
 const path = require('path');
+const Redis = require("ioredis");
 const ShortUrl = require('./models/url');
 const redis = new Redis();
  
